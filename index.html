@@ -1,0 +1,236 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Badminton Online 1v1</title><style>
+*{box-sizing:border-box}body{margin:0;background:#09121b;color:#fff;font-family:system-ui,'Malgun Gothic',sans-serif;overflow:hidden}#lobby{position:absolute;z-index:10;inset:0;display:grid;place-items:center;background:#061421e8}#card{background:#112c3e;border:1px solid #52788d;border-radius:20px;padding:26px;max-width:440px;width:92%;text-align:center;box-shadow:0 20px 80px #0008}button,input{font:inherit;border-radius:9px;padding:11px;border:1px solid #608ca2}button{background:#1b807e;color:white;cursor:pointer;font-weight:700}input{background:#071c2b;color:white;width:130px;text-transform:uppercase;text-align:center}#top{position:absolute;left:50%;top:14px;transform:translateX(-50%);text-align:center;background:#071d2bdc;border-radius:12px;padding:9px 22px;pointer-events:none;min-width:270px}#score{font-size:30px;font-weight:800}#status{font-size:12px;color:#c9e7ef}#bottom{position:absolute;left:15px;bottom:15px;background:#071d2bdc;border-radius:12px;padding:12px;line-height:1.7;font-size:12px}#power{position:absolute;right:15px;bottom:15px;background:#071d2bdc;border-radius:12px;padding:12px}#bar{width:230px;height:17px;background:#3b5966;border-radius:9px;margin-top:6px;overflow:hidden}#fill{background:linear-gradient(90deg,#5bd5e7,#6af2c6,#ffcf65);height:100%;width:0;transition:width .035s linear}#power{min-width:258px;border:1px solid #52788d}#power .meterNote{font-size:10px;color:#b9d6df;margin-top:6px}#power .midMark{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#fff9}#bar{position:relative}#settings{display:block!important;position:static!important;min-width:0!important;background:transparent!important;padding:0!important}#pauseOverlay{display:none;position:fixed;inset:0;z-index:30;background:#06121cdb;align-items:center;justify-content:center;padding:20px}#pauseOverlay.open{display:flex}#pausePanel{width:min(760px,96vw);max-height:90vh;overflow-y:auto;background:#102c3d;border:1px solid #62849a;border-radius:18px;padding:24px;box-shadow:0 25px 90px #000b}#pausePanel h2{margin:0 0 8px}#pausePanel h3{margin:18px 0 8px}#pausePanel .settingsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}#pausePanel label{display:block;margin:12px 0 5px}#pausePanel input[type=range]{width:100%;padding:0;accent-color:#6af2c6}#pausePanel input[type=checkbox]{width:auto}#pausePanel .hint{font-size:12px;color:#bed5e0;line-height:1.6}#pausePanel .rules{font-size:13px;line-height:1.8;color:#e3f2f8}#pausePanel .tuneHead{font-weight:700;margin:12px 0 5px}#pausePanel small{display:block;color:#c2d8e1;margin-top:10px}#cross{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;pointer-events:none}#toast{color:#f7db8c;font-size:13px;margin:10px 0}#settings{position:absolute;right:15px;top:15px;z-index:12;background:#071d2be8;padding:12px 14px;border-radius:12px;font-size:13px;min-width:210px}#settings input{width:125px;padding:0;vertical-align:middle;accent-color:#6af2c6}#settings label{display:block;margin-bottom:7px}#settings .tuneHead{margin:12px 0 8px;padding-top:10px;border-top:1px solid #42606f;font-weight:700}#settings .hint{font-size:11px;line-height:1.4;color:#a9c8d4}#settings small{color:#b9d6df;display:block;margin-top:5px}#room{color:#7cf3d6;font-weight:800;font-size:25px;letter-spacing:4px}canvas{display:block}</style></head><body>
+<div id="top"><div id="score">0 : 0</div><div id="status">온라인 방에 접속하세요</div></div><div id="cross">+</div><div id="bottom" style="display:none"><span id="identity"></span></div><div id="power">충전 게이지 <span id="pct">0%</span><div id="bar"><div id="fill"></div><div class="midMark" title="50% 기준"></div></div><div class="meterNote">0% ───── 50% (샷 분기) ───── 100%<br>실제 타격 파워: <span id="realPower">30%</span></div></div>
+<div id="pauseOverlay"><div id="pausePanel"><h2>🏸 일시정지 · 조작 및 설정</h2><p class="hint">ESC를 누르면 마우스 잠금이 풀리고 이 메뉴가 열려요. 설정을 바꾼 뒤 아래 버튼을 눌러 경기에 복귀하세요.</p><div class="settingsGrid"><section><h3>🎮 조작 설명</h3><div class="rules">W A S D — 이동<br>스페이스바 — 점프<br>마우스 — 시점 변경<br>좌클릭 길게 누른 뒤 놓기 — 위로 타격<br>우클릭 길게 누른 뒤 놓기 — 아래로 타격<br>머리 위 높은 공: 좌클릭 하이클리어 / 우클릭 스매시<br>네트 앞 좌클릭: 약한 충전 헤어핀 / 강한 충전 언더<br>상대 스매시 수비: 좌클릭 언더 / 우클릭 드라이브<br>풀충전 일반 타구: 상대 코트 맨 뒤 목표<br>R — 새 경기<br>ESC — 설정 열기</div><p class="hint">충전 게이지 0~100%는 최소 타격 파워 30%부터 최대 50%까지를 나타냅니다. 높이와 네트 근접 여부에 따라 타구가 결정됩니다.</p></section><section><h3>⚙️ 조절창</h3><div id="settings"><label for="mouseSense">마우스 감도 <strong id="senseLabel">100%</strong></label><input id="mouseSense" type="range" min="30" max="250" step="5" value="100"><div class="tuneHead">🔊 경기 효과음</div><label for="sfxVolume">효과음 볼륨 <strong id="volumeLabel">65%</strong></label><input id="sfxVolume" type="range" min="0" max="100" step="5" value="65"><button type="button" id="testHitSound" style="margin:8px 0;padding:8px">🔊 스매시 소리 테스트</button><span id="soundStatus" style="font-size:12px;color:#bde7d9"></span><label style="margin-top:6px"><input id="sfxMute" type="checkbox" style="width:auto"> 음소거</label><div class="tuneHead">🧪 임시 물리 튜닝</div><label for="dragTune">공기저항 <strong id="dragLabel">0.048</strong></label><input id="dragTune" type="range" min="0.005" max="0.120" step="0.001" value="0.048"><label for="baseTune">기본 파워 <strong id="baseLabel">30%</strong> (고정)</label><input id="baseTune" type="range" min="30" max="30" step="1" value="30" disabled><label>최대 파워 <strong>50%</strong> (고정)</label><label for="chargeTune">최대 충전 시간 <strong id="chargeLabel">550ms</strong></label><input id="chargeTune" type="range" min="200" max="1500" step="25" value="550"><div class="hint">충전 시간이 짧을수록 파워가 빠르게 찹니다.<br>온라인은 방장만 변경할 수 있고 모두에게 적용됩니다.</div><button id="resetTune" style="padding:6px 9px;margin-top:9px;font-size:12px">기본값 복원</button><small>물리 튜닝은 최적값을 찾은 후 제거할 임시 기능입니다.</small></div></section></div><button id="resumeGame" style="width:100%;margin-top:20px">▶ 경기 계속하기</button></div></div><div id="lobby"><div id="card"><h1>🏸 배드민턴</h1><p>AI 또는 친구와 대전하세요. 좌클릭은 위로 띄우고 우클릭은 아래로 내리꽂습니다. 높은 공: 좌클릭 하이클리어 / 우클릭 스매시. 풀충전 일반 타구는 코트 뒤쪽에 떨어집니다. 서브: 약하게 숏·강하게 롱.</p><div style="background:#0a2534;border:1px solid #426579;border-radius:12px;padding:12px;margin:14px 0"><div style="font-weight:700;margin-bottom:9px">🏸 AI 연습 종류 선택</div><button id="solo" style="background:#d39a36;color:#10252d;width:100%;margin-bottom:8px">🤖 일반 AI 연습</button><button id="smashPractice" style="width:100%;margin-bottom:8px;background:#b94f4f">💥 스매시 전용 AI</button><button id="drivePractice" style="width:100%;background:#2868a8">⚡ 드라이브 전용 AI</button><p style="font-size:11px;color:#b9d6df;margin:8px 0 0">스매시 AI는 높은 공에서 스매시만, 드라이브 AI는 드라이브만 리턴합니다. 서브는 기존 규칙을 따릅니다.</p></div><hr style="border:0;border-top:1px solid #406174;margin:20px 0"><button id="create">친구와 방 만들기</button><p>또는 방 코드로 참가</p><input id="code" maxlength="5" placeholder="ABCDE"> <button id="join">참가</button><p id="toast"></p><div id="room"></div><p id="wait"></p><p style="font-size:12px;color:#9fc5d0">게임 서버를 실행해야 접속할 수 있습니다. 온라인 대전은 한 방에 2명까지 참여할 수 있습니다.</p><button id="play" style="display:none">경기 시작 / 화면 잠금</button></div></div>
+<script src="/socket.io/socket.io.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js"></script><script>
+// Real racket impact snippets processed from the user-provided reference clip.
+const hitSamples={smash:'hit_smash_5sec_v7.wav?v=7',drive:'hit_drive_5sec_v7.wav?v=7',clear:'hit_clear_5sec_v7.wav?v=7',soft:'hit_soft_5sec_v7.wav?v=7'};
+const hitBuffers={};
+const hitLoading={};
+function loadHitSamples(){if(!audioCtx)return;for(const [key,url] of Object.entries(hitSamples)){if(hitBuffers[key]||hitLoading[key])continue;hitLoading[key]=true;fetch(url).then(r=>{if(!r.ok)throw Error('audio '+r.status+': '+url);return r.arrayBuffer()}).then(b=>audioCtx.decodeAudioData(b)).then(b=>{hitBuffers[key]=b;}).catch(err=>console.error('타격 효과음 로딩 실패:',err)).finally(()=>{hitLoading[key]=false;});}}
+function playRacketHit(shot,vol){
+ const type=shot.includes('스매시')?'smash':shot.includes('드라이브')?'drive':(/헤어핀|드롭|숏서브/.test(shot)?'soft':'clear');
+ const buffer=hitBuffers[type];if(!buffer||!audioCtx)return false;
+ const src=audioCtx.createBufferSource(),gain=audioCtx.createGain();src.buffer=buffer;gain.gain.value=vol*(type==='smash'?1.35:type==='soft'?.58:1.0);src.connect(gain);gain.connect(audioCtx.destination);src.start();return true;
+}
+// Web Audio synthesized effects: no external sound files or autoplay dependency.
+let audioCtx=null;const volumeSlider=document.getElementById('sfxVolume'),muteBox=document.getElementById('sfxMute');
+try{const v=localStorage.getItem('badmintonSfxVolume');if(v!==null&&Number.isFinite(+v))volumeSlider.value=String(Math.max(0,Math.min(100,+v)));muteBox.checked=localStorage.getItem('badmintonSfxMuted')==='true';}catch(e){}
+function updateAudioUI(){document.getElementById('volumeLabel').textContent=volumeSlider.value+'%';try{localStorage.setItem('badmintonSfxVolume',volumeSlider.value);localStorage.setItem('badmintonSfxMuted',muteBox.checked);}catch(e){}}
+volumeSlider.addEventListener('input',updateAudioUI);muteBox.addEventListener('change',updateAudioUI);updateAudioUI();
+function unlockAudio(){try{audioCtx??=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume().catch(console.error);loadHitSamples();}catch(e){console.error('Audio init:',e);}}
+document.getElementById('testHitSound').addEventListener('click',async()=>{muteBox.checked=false;volumeSlider.value='100';updateAudioUI();unlockAudio();const status=document.getElementById('soundStatus');status.textContent='소리 준비 중…';try{const ctx=audioCtx;if(ctx.state!=='running')await ctx.resume();const url=hitSamples.smash;const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);const bytes=await response.arrayBuffer();const buffer=await ctx.decodeAudioData(bytes);hitBuffers.smash=buffer;const ok=playRacketHit('스매시',1);status.textContent=ok?'✓ 소리 재생 중':'재생 실패';}catch(err){status.textContent='오류: '+err.message;console.error(err);}});
+window.addEventListener('pointerdown',unlockAudio,{passive:true});window.addEventListener('keydown',unlockAudio,{passive:true});
+function sfx(kind,shot=''){if(!audioCtx||muteBox.checked)return;const vol=(+volumeSlider.value/100);if(!vol)return;
+ if(kind==='hit'){if(playRacketHit(shot,vol))return;loadHitSamples();return;}const now=audioCtx.currentTime,master=audioCtx.createGain();master.gain.value=vol*.52;master.connect(audioCtx.destination);
+ function tone(freq,endFreq,dur,amp,type='triangle',delay=0){const o=audioCtx.createOscillator(),g=audioCtx.createGain(),t=now+delay;o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(20,endFreq),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.0002,amp),t+.003);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+.01);}
+ function noise(dur,amp,highpass=500){const count=Math.ceil(audioCtx.sampleRate*dur),buf=audioCtx.createBuffer(1,count,audioCtx.sampleRate),data=buf.getChannelData(0);for(let i=0;i<count;i++)data[i]=Math.random()*2-1;const src=audioCtx.createBufferSource(),f=audioCtx.createBiquadFilter(),g=audioCtx.createGain();src.buffer=buf;f.type='highpass';f.frequency.value=highpass;g.gain.setValueAtTime(Math.max(.0001,amp),now);g.gain.exponentialRampToValueAtTime(.0001,now+dur);src.connect(f);f.connect(g);g.connect(master);src.start(now);src.stop(now+dur);}
+ if(kind==='hit'){const hard=shot==='스매시',soft=shot==='드롭'||shot==='헤어핀';noise(soft?.035:hard?.105:.07,soft?.12:hard?.55:.3,hard?800:1200);tone(hard?240:soft?440:330,hard?75:soft?200:110,soft?.055:hard?.14:.09,soft?.12:hard?.5:.3);}
+ else if(kind==='land'){noise(.075,.17,650);tone(135,65,.09,.13);}
+ else if(kind==='net'){noise(.12,.15,1300);tone(175,90,.12,.11);}
+ else if(kind==='point'){tone(540,650,.14,.17);tone(760,910,.20,.14,'sine',.13);}
+}
+let previousAudioPhase=null,previousAudioMessage='',previousAudioScore='';
+function audioFromState(s){if(!s)return;const score=s.score.join(':');if(previousAudioPhase!==null){if(s.phase==='flight'&&(previousAudioPhase!=='flight'||s.message!==previousAudioMessage)){const m=s.message.match(/· (.+)!$/);sfx('hit',m?m[1]:'');}if(s.phase==='point'&&previousAudioPhase!=='point'){sfx(s.message.startsWith('네트')?'net':'land');setTimeout(()=>sfx('point'),140);}else if(score!==previousAudioScore&&s.phase==='ended')sfx('point');}previousAudioPhase=s.phase;previousAudioMessage=s.message;previousAudioScore=score;}
+const socket=io(),$=id=>document.getElementById(id);let seat=0,joined=false,active=false,world=null,charging=false,chargeAt=0,yaw=0,pitch=0;const keys={};const senseSlider=$('mouseSense'),senseLabel=$('senseLabel');let mouseSensitivity=1;try{const saved=Number(localStorage.getItem('badmintonMouseSensitivity'));if(Number.isFinite(saved)&&saved>=30&&saved<=250)senseSlider.value=String(saved);}catch(e){}function updateSensitivity(){mouseSensitivity=Number(senseSlider.value)/100;senseLabel.textContent=senseSlider.value+'%';try{localStorage.setItem('badmintonMouseSensitivity',senseSlider.value);}catch(e){}}senseSlider.addEventListener('input',updateSensitivity);updateSensitivity();let tuning={drag:0.048,basePower:0.3,maxPower:0.5,chargeMs:550};const dragTune=$('dragTune'),baseTune=$('baseTune'),chargeTune=$('chargeTune');function drawTuning(){dragTune.value=tuning.drag.toFixed(3);baseTune.value=Math.round(tuning.basePower*100);chargeTune.value=tuning.chargeMs;$('dragLabel').textContent=tuning.drag.toFixed(3);$('baseLabel').textContent=Math.round(tuning.basePower*100)+'%';$('chargeLabel').textContent=tuning.chargeMs+'ms';}function tuneChanged(){if(!joined||seat!==0)return;tuning={drag:Number(dragTune.value),basePower:0.3,maxPower:0.5,chargeMs:Number(chargeTune.value)};drawTuning();socket.emit('tuning',tuning);}for(const el of [dragTune,baseTune,chargeTune])el.addEventListener('input',tuneChanged);$('resetTune').onclick=()=>{if(!joined||seat!==0)return;tuning={drag:0.048,basePower:0.3,maxPower:0.5,chargeMs:550};drawTuning();socket.emit('tuning',tuning);};socket.on('tuning',v=>{tuning=v;drawTuning();});drawTuning();function shotPower(elapsed){return Math.min(tuning.maxPower||0.5,tuning.basePower+elapsed/tuning.chargeMs*((tuning.maxPower||0.5)-tuning.basePower));}function tunePermissions(){const disabled=!joined||seat!==0;for(const el of [dragTune,baseTune,chargeTune,$('resetTune')])el.disabled=disabled;}tunePermissions();socket.on('joined',()=>setTimeout(tunePermissions,0));socket.on('closed',()=>setTimeout(tunePermissions,0));const my={x:0,z:4.70};let jumpY=0,jumpV=0;
+$('solo').onclick=()=>socket.emit('solo','normal');$('smashPractice').onclick=()=>socket.emit('solo','smash');$('drivePractice').onclick=()=>socket.emit('solo','drive');$('create').onclick=()=>socket.emit('create');$('join').onclick=()=>socket.emit('join',$('code').value);$('play').onclick=()=>{active=true;$('lobby').style.display='none';$('pauseOverlay').classList.remove('open');renderer.domElement.requestPointerLock?.();};
+socket.on('joined',d=>{remoteSwingState?.forEach?.(r=>{r.stamp=0;r.started=-1;});seat=d.seat;joined=true;my.x=seat===0?1.20:-1.20;my.z=seat===0?3.90:-3.90;yaw=seat===0?0:Math.PI;jumpY=0;jumpV=0;$('room').textContent=d.ai?(d.aiMode==='smash'?'스매시 AI 연습':d.aiMode==='drive'?'드라이브 AI 연습':'AI 연습 경기'):d.code;$('identity').textContent=seat===0?'파랑 플레이어 · 가까운 코트':'주황 플레이어 · 먼 코트';$('wait').textContent=d.ai?'AI 상대가 준비됐습니다. 경기 시작을 눌러주세요.':'방 코드를 친구에게 알려주세요. 상대가 접속하면 시작할 수 있습니다.';$('toast').textContent='';});
+socket.on('ready',()=>{$('wait').textContent='상대가 접속했습니다!';$('play').style.display='inline-block';$('toast').textContent=seat===0&&$('room').textContent.includes('AI 연습')?'AI와 대전할 준비가 됐어요.':'두 사람이 각자 시작 버튼을 눌러주세요.';});socket.on('notice',s=>$('toast').textContent=s);socket.on('closed',()=>{active=false;joined=false;document.exitPointerLock?.();$('lobby').style.display='grid';$('play').style.display='none';$('wait').textContent='연결이 끊겼습니다. 새 방을 만들어 주세요.';});socket.on('disconnect',()=>{$('status').textContent='서버 연결이 끊겼습니다.';});socket.on('state',s=>{audioFromState(s);receiveBallState(s);if(world&&world.phase==='point'&&s.phase==='serve'){my.x=s.p[seat].x;my.z=s.p[seat].z;jumpY=0;jumpV=0;}world=s;if(s.phase==='serve'&&!s.serviceReady){$('status').textContent='서브 대기: 양쪽 선수 모두 대각선 서비스 칸으로 이동하세요';} $('score').textContent=s.score[0]+' : '+s.score[1];$('status').textContent=s.phase==='serve'&&!s.serviceReady?'서브 대기: 양쪽 선수 모두 대각선 서비스 칸으로 이동하세요':s.message;});
+if(typeof THREE==='undefined'){$('toast').textContent='Three.js를 불러올 수 없습니다. 인터넷 연결을 확인하세요.';throw Error('Three.js missing');}
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x152738);scene.fog=new THREE.Fog(0x152738,20,65);const camera=new THREE.PerspectiveCamera(74,innerWidth/innerHeight,.05,100),renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));document.body.appendChild(renderer.domElement);scene.add(new THREE.HemisphereLight(0xffffff,0x54616b,2));const sun=new THREE.DirectionalLight(0xffffff,2.1);sun.position.set(-5,13,5);scene.add(sun);
+const material=(c)=>new THREE.MeshStandardMaterial({color:c,roughness:.72});
+const green=material(0x176c54),white=material(0xf8f9f4),floor=material(0x4a5660),dark=material(0x223847);
+function block(w,h,d,x,y,z,m){const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);scene.add(mesh);return mesh;}
+// BWF regulation court: 13.40 m long, 6.10 m doubles / 5.18 m singles wide.
+// Singles long-service line = back boundary; short-service line 1.98 m from net.
+block(70,.1,70,0,-.11,0,floor);
+block(6.10,.02,13.40,0,.01,0,green);
+block(70,18,.2,0,9,-24,dark);block(.2,18,50,-19,9,0,dark);block(.2,18,50,19,9,0,dark);
+// Court lines are 40 mm wide; the line itself counts as in.
+function line(x,z,X,Z){const length=Math.hypot(X-x,Z-z);const mesh=new THREE.Mesh(new THREE.PlaneGeometry(.04,length),new THREE.MeshBasicMaterial({color:0xf8f9f4,side:THREE.DoubleSide}));mesh.rotation.x=-Math.PI/2;mesh.rotation.z=-Math.atan2(X-x,Z-z);mesh.position.set((x+X)/2,.026,(z+Z)/2);scene.add(mesh);}
+for(const z of [-6.70,6.70,-1.98,1.98])line(-3.05,z,3.05,z);
+for(const x of [-3.05,3.05,-2.59,2.59])line(x,-6.70,x,6.70);
+line(0,-6.70,0,-1.98);line(0,1.98,0,6.70);
+// Doubles long-service line: 0.76 m inside each back boundary.
+line(-3.05,-5.94,3.05,-5.94);line(-3.05,5.94,3.05,5.94);
+// Actual badminton net: 6.10 m wide, 1.524 m high at center, 1.55 m at posts.
+// Black square mesh (~20 mm openings), white 75 mm top band and side bindings.
+// Net bottom is ~0.79 m above the court; posts remain floor-mounted.
+const netCord=new THREE.MeshBasicMaterial({color:0x111316,side:THREE.DoubleSide});
+const netWhite=new THREE.MeshStandardMaterial({color:0xf8f7ee,roughness:.82,side:THREE.DoubleSide});
+const postMat=material(0x171a1d);
+const netBottom=0.79; // Regulation net depth ~0.76 m, suspended above the floor.
+const netPositions=[];
+function netSegment(x1,y1,x2,y2){netPositions.push(x1,y1,0,x2,y2,0);}
+const topAt=x=>1.524+.026*Math.pow(Math.abs(x)/3.05,2);
+// 20 mm mesh, 0.003 m yarn. Single batched geometry avoids hundreds of draw calls.
+for(let x=-3.05;x<=3.0501;x+=.02){const xx=Math.min(3.05,x);netSegment(xx,netBottom,xx,topAt(xx)-.0375);}
+for(let y=netBottom;y<=1.53;y+=.02){for(let x=-3.05;x<3.05;x+=.02){const xx=Math.min(3.05,x+.02);if(y<Math.min(topAt(x),topAt(xx))-.0375)netSegment(x,y,xx,y);}}
+const meshGeom=new THREE.BufferGeometry();meshGeom.setAttribute('position',new THREE.Float32BufferAttribute(netPositions,3));
+const netLines=new THREE.LineSegments(meshGeom,new THREE.LineBasicMaterial({color:0x090b0d,transparent:true,opacity:.96}));scene.add(netLines);
+// The top tape follows the slight 26 mm dip at mid-court.
+for(let i=0;i<80;i++){const x1=-3.05+i*6.10/80,x2=-3.05+(i+1)*6.10/80;const y1=topAt(x1),y2=topAt(x2);const strip=new THREE.Mesh(new THREE.PlaneGeometry(x2-x1,.075),netWhite);strip.position.set((x1+x2)/2,(y1+y2)/2-.0375,.003);strip.rotation.z=Math.atan2(y2-y1,x2-x1);scene.add(strip);}
+for(const x of [-3.05,3.05]){block(.065,1.55,.065,x,.775,0,postMat);block(.16,.025,.16,x,.018,0,postMat);block(.025,1.55-netBottom,.018,x,(1.55+netBottom)/2,0,netWhite);}
+const ball=new THREE.Group();
+// Feather shuttlecock: cork base, narrow quills, overlapping tapered feather vanes.
+const corkMat=new THREE.MeshStandardMaterial({color:0xe7d6b4,roughness:.91});
+const featherMat=new THREE.MeshStandardMaterial({color:0xf6f6ed,roughness:.83,side:THREE.DoubleSide});
+const quillMat=new THREE.MeshStandardMaterial({color:0xe4e2d5,roughness:.78});
+const bandMat=new THREE.MeshStandardMaterial({color:0xd1cbb7,roughness:.8});
+const cork=new THREE.Mesh(new THREE.CylinderGeometry(.064,.085,.12,18),corkMat);cork.position.y=-.01;ball.add(cork);
+const corkTip=new THREE.Mesh(new THREE.SphereGeometry(.064,16,10,0,Math.PI*2,0,Math.PI/2),corkMat);corkTip.rotation.x=Math.PI;corkTip.position.y=-.07;ball.add(corkTip);
+const featherCount=16;
+for(let i=0;i<featherCount;i++){
+ const a=i*Math.PI*2/featherCount;
+ const base=new THREE.Vector3(Math.cos(a)*.052,.045,Math.sin(a)*.052);
+ const tip=new THREE.Vector3(Math.cos(a)*.19,.39,Math.sin(a)*.19);
+ const vec=new THREE.Vector3().subVectors(tip,base);
+ const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.003,.005,vec.length(),5),quillMat);
+ shaft.position.copy(base).addScaledVector(vec,.5);shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),vec.clone().normalize());ball.add(shaft);
+ const tangent=new THREE.Vector3(-Math.sin(a),0,Math.cos(a));
+ const v0=base.clone().lerp(tip,.34),v1=base.clone().lerp(tip,.65),v2=tip.clone();
+ const verts=[];const width=.042;
+ for(const [p,w] of [[v0,.013],[v1,width],[v2,.027]]){const left=p.clone().addScaledVector(tangent,-w),right=p.clone().addScaledVector(tangent,w);verts.push(left.x,left.y,left.z,right.x,right.y,right.z);}
+ const geom=new THREE.BufferGeometry();geom.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geom.setIndex([0,1,2,1,3,2,2,3,4,3,5,4]);geom.computeVertexNormals();ball.add(new THREE.Mesh(geom,featherMat));
+}
+for(const y of [.09,.14]){const band=new THREE.Mesh(new THREE.TorusGeometry(.074+(y-.09)*.26,.006,6,28),bandMat);band.rotation.x=Math.PI/2;band.position.y=y;ball.add(band);}
+ball.scale.setScalar(0.82);scene.add(ball);
+// Articulated player: pelvis -> waist -> chest -> shoulders -> elbows -> wrists, plus both knees.
+function avatar(color){
+ const g=new THREE.Group(),shirt=material(color),skin=material(0xd9ab8c),shorts=material(0x203247),shoe=material(0xe5e9f0);
+ const joint=(parent,x,y,z)=>{const j=new THREE.Group();j.position.set(x,y,z);parent.add(j);return j;};
+ const block=(parent,w,h,d,x,y,z,mat)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);parent.add(m);return m;};
+ const pelvis=joint(g,0,.94,0);block(pelvis,.43,.28,.29,0,-.06,0,shorts);
+ const waist=joint(pelvis,0,.13,0);block(waist,.36,.24,.25,0,.10,0,shirt);
+ const chest=joint(waist,0,.23,0);block(chest,.49,.40,.29,0,.19,0,shirt);
+ const neck=joint(chest,0,.46,0);block(neck,.16,.15,.16,0,.05,0,skin);const head=new THREE.Mesh(new THREE.SphereGeometry(.16,14,12),skin);head.position.y=.21;neck.add(head);
+ const shoulders=[],elbows=[],wrists=[],knees=[],hips=[];
+ for(const side of [-1,1]){
+  const shoulder=joint(chest,side*.32,.36,0);block(shoulder,.16,.35,.17,0,-.18,0,shirt);
+  const elbow=joint(shoulder,0,-.36,0);block(elbow,.135,.33,.14,0,-.17,0,skin);
+  const wrist=joint(elbow,0,-.34,0);block(wrist,.11,.13,.12,0,-.065,0,skin);
+  shoulders.push(shoulder);elbows.push(elbow);wrists.push(wrist);
+  const hip=joint(pelvis,side*.15,-.16,0);block(hip,.17,.42,.19,0,-.22,0,shorts);
+  const knee=joint(hip,0,-.44,0);block(knee,.145,.40,.17,0,-.21,0,skin);block(knee,.20,.12,.32,0,-.44,-.07,shoe);
+  hips.push(hip);knees.push(knee);
+ }
+ const racket=joint(wrists[1],0,-.1,0);block(racket,.055,.43,.055,0,-.17,0,shorts);const hoop=new THREE.Mesh(new THREE.TorusGeometry(.19,.022,8,24),shoe);hoop.position.y=-.56;racket.add(hoop);
+ for(let x=-.15;x<=.15;x+=.075)block(racket,.006,.30,.006,x,-.56,0,shoe);
+ return {g,pelvis,waist,chest,shoulders,elbows,wrists,hips,knees,racket};
+}
+const athletes=[avatar(0x20c3dd),avatar(0xf5a65a)];athletes.forEach(a=>scene.add(a.g));
+// First-person view has an actual shoulder, elbow and wrist driving the racket.
+const viewArm=new THREE.Group();viewArm.position.set(.37,-.34,-.32);camera.add(viewArm);
+const upperArm=new THREE.Group();viewArm.add(upperArm);const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(.105,.085,.37,10),material(0x20c3dd));sleeve.position.y=-.17;upperArm.add(sleeve);
+const viewElbow=new THREE.Group();viewElbow.position.y=-.35;upperArm.add(viewElbow);const forearm=new THREE.Mesh(new THREE.CylinderGeometry(.075,.055,.34,10),material(0xd9ab8c));forearm.position.y=-.17;viewElbow.add(forearm);
+const viewWrist=new THREE.Group();viewWrist.position.y=-.35;viewElbow.add(viewWrist);const localRacket=new THREE.Group();viewWrist.add(localRacket);scene.add(camera);
+const handle=new THREE.Mesh(new THREE.CylinderGeometry(.022,.027,.4,10),material(0x172b34));handle.position.y=-.2;localRacket.add(handle);const ring=new THREE.Mesh(new THREE.TorusGeometry(.23,.019,8,32),material(0xe5bb61));ring.position.y=.22;localRacket.add(ring);const hand=new THREE.Mesh(new THREE.SphereGeometry(.095,12,8),material(0xd9ab8c));hand.position.y=-.045;localRacket.add(hand);
+// v11: Screen-space racket is intentionally visible in first person. The old
+// joint chain hung below the camera frustum, so its animation was invisible.
+viewArm.visible=false;
+const swingView=new THREE.Group();camera.add(swingView);
+const swingGrip=new THREE.Group();swingView.add(swingGrip);
+const v11Skin=material(0xd9ab8c),v11Sleeve=material(0x20c3dd),v11Frame=material(0xf1cc71),v11Dark=material(0x24313a);
+const v11Arm=new THREE.Mesh(new THREE.CylinderGeometry(.078,.105,.46,12),v11Sleeve);v11Arm.position.set(.08,-.29,0);v11Arm.rotation.z=-.24;swingGrip.add(v11Arm);
+const v11Forearm=new THREE.Mesh(new THREE.CylinderGeometry(.054,.075,.35,12),v11Skin);v11Forearm.position.set(-.025,-.02,-.02);v11Forearm.rotation.z=.35;swingGrip.add(v11Forearm);
+const v11Hand=new THREE.Mesh(new THREE.SphereGeometry(.084,12,10),v11Skin);v11Hand.position.set(-.09,.13,-.02);swingGrip.add(v11Hand);
+const v11Handle=new THREE.Mesh(new THREE.CylinderGeometry(.024,.029,.48,12),v11Dark);v11Handle.position.set(-.11,.32,-.03);v11Handle.rotation.z=.12;swingGrip.add(v11Handle);
+const v11Head=new THREE.Mesh(new THREE.TorusGeometry(.205,.019,10,36),v11Frame);v11Head.position.set(-.16,.76,-.03);v11Head.scale.y=1.25;swingGrip.add(v11Head);
+for(let i=-3;i<=3;i++){const str=new THREE.Mesh(new THREE.CylinderGeometry(.003,.003,.46,4),v11Frame);str.position.set(-.16+i*.047,.76,-.03);swingGrip.add(str);}
+for(let i=-3;i<=3;i++){const str=new THREE.Mesh(new THREE.CylinderGeometry(.003,.003,.35,4),v11Frame);str.rotation.z=Math.PI/2;str.position.set(-.16,.76+i*.056,-.03);swingGrip.add(str);}
+const swingHud=document.createElement('div');swingHud.id='swingHud';swingHud.style.cssText='position:fixed;bottom:84px;right:22px;z-index:5;color:#fff;background:#092536c9;padding:8px 12px;border-radius:8px;font:13px system-ui;pointer-events:none';swingHud.textContent='스윙 확인: T 키 · 타격: 마우스 버튼 놓기';document.body.appendChild(swingHud);
+function startVisibleSwing(shot,y,side){localSwingAt=performance.now();localSwingType=shot;localContactY=y;localContactSide=side;swingHud.textContent='스윙 모션: '+shot;}
+window.addEventListener('keydown',e=>{if(e.code==='KeyT'&&!e.repeat&&active){startVisibleSwing('스매시',2.8,0);}});
+// Four distinct kinetic chains: overhead power, high clear, flat drive, and net touch.
+let localSwingAt=-1,localSwingType='clear',localContactY=1.7,localContactSide=0;
+const swingProfiles={
+ smash:{duration:510,shoulder:-1.72,elbow:-1.24,wrist:-1.35,chest:-.55,waist:-.55,pelvis:.37,knee:.43,lean:.24,armX:-1.05,handX:-.35,follow:1.1},
+ clear:{duration:690,shoulder:-1.28,elbow:-.98,wrist:-.76,chest:-.37,waist:-.32,pelvis:.24,knee:.27,lean:.12,armX:-.68,handX:-.2,follow:.9},
+ drive:{duration:340,shoulder:-.83,elbow:-.72,wrist:-1.12,chest:-.25,waist:-.24,pelvis:.16,knee:.23,lean:.07,armX:-.3,handX:.08,follow:.72},
+ hairpin:{duration:570,shoulder:-.38,elbow:-.38,wrist:-.31,chest:-.09,waist:-.08,pelvis:.07,knee:.33,lean:.17,armX:.18,handX:.22,follow:.32}
+};
+function shotMotion(name){name=String(name||'');if(/스매시/.test(name))return 'smash';if(/헤어핀|드롭|숏서브/.test(name))return 'hairpin';if(/드라이브/.test(name))return 'drive';return 'clear';}
+function swingStages(elapsed,duration){const t=Math.max(0,Math.min(1,elapsed/duration));if(t>=1)return {prep:0,strike:0,follow:0,active:0};const smooth=x=>x*x*(3-2*x);const prep=t<.27?smooth(t/.27):t<.45?1-smooth((t-.27)/.18):0;const strike=t<.25?0:t<.54?smooth((t-.25)/.29):1;const follow=t<.5?0:t<.69?smooth((t-.5)/.19):1-smooth((t-.69)/.31);const active=t<.27?-.56*prep:t<.54?-.56+1.56*smooth((t-.27)/.27):1-smooth((t-.54)/.46);return {prep,strike,follow,active};}
+// Contact height is captured at the instant of impact and synchronized for online players.
+// Low balls pull the racket and body down; high balls extend the shoulder and racket upward.
+function contactPose(y,side){
+ const h=Math.max(.35,Math.min(3.5,Number(y)||1.7));
+ const lift=Math.max(-1,Math.min(1,(h-1.72)/1.45));
+ return {lift,side:Math.max(-1,Math.min(1,Number(side)||0)),low:Math.max(0,-lift),high:Math.max(0,lift)};
+}
+function animateBody(a,elapsed,walk,phase,shot,contactY,contactSide){
+ const kind=shotMotion(shot),p=swingProfiles[kind],v=swingStages(elapsed,p.duration),sw=v.active,prep=v.prep,follow=v.follow,cp=contactPose(contactY,contactSide),impact=Math.max(0,1-Math.abs(elapsed/p.duration-.48)/.30);
+ a.pelvis.rotation.y=p.pelvis*sw;a.pelvis.rotation.z=.09*sw;
+ a.waist.rotation.y=p.waist*sw;a.waist.rotation.x=p.lean*(prep+follow*.4)+cp.low*.35*impact;
+ a.chest.rotation.y=p.chest*sw;a.chest.rotation.z=-p.lean*(prep*.5+follow)+cp.side*.16*impact;
+ a.shoulders[1].rotation.z=-.35+1.65*prep-2.15*Math.max(0,sw)+.80*follow-cp.high*.38*impact+cp.low*.25*impact;
+ a.shoulders[1].rotation.x=-.35-1.15*prep+1.55*Math.max(0,sw)+.42*follow-cp.high*.24*impact;
+ a.elbows[1].rotation.z=-.90*prep+1.40*Math.max(0,sw)+.25*follow;a.elbows[1].rotation.x=.35*prep;
+ a.wrists[1].rotation.z=-.45*prep+1.65*Math.max(0,sw)+.32*follow;a.wrists[1].rotation.x=p.handX*follow+cp.high*.18*impact-cp.low*.25*impact;
+ a.racket.rotation.x=-.55*prep+1.10*Math.max(0,sw)-cp.high*.24*impact+cp.low*.26*impact;
+ a.shoulders[0].rotation.z=.23+.32*follow;a.elbows[0].rotation.z=.12+.22*prep;
+ for(let i=0;i<2;i++){const sign=i===0?1:-1;a.hips[i].rotation.x=sign*.32*walk-.18*p.knee*prep;a.knees[i].rotation.x=Math.max(0,-sign*.32*walk)+p.knee*(prep+follow*.35)+cp.low*.48*impact;}
+}
+window.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='Space'){e.preventDefault();if(active&&document.pointerLockElement===renderer.domElement&&!e.repeat&&!(world&&world.phase==='serve'&&world.server===seat)&&jumpY<=.001&&jumpV===0){jumpV=5.4;socket.emit('jump');}}if(e.code==='KeyR'&&active&&document.pointerLockElement===renderer.domElement)socket.emit('restart');});window.addEventListener('keyup',e=>keys[e.code]=false);window.addEventListener('mousemove',e=>{if(document.pointerLockElement===renderer.domElement){yaw-=e.movementX*.0025*mouseSensitivity;pitch=Math.max(-1.2,Math.min(1.2,pitch-e.movementY*.0025*mouseSensitivity));}});renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
+function showPause(){if(!active)return;charging=false;for(const k in keys)keys[k]=false;$('pauseOverlay').classList.add('open');}
+function resumeGame(){if(!active)return;renderer.domElement.requestPointerLock?.();}
+$('resumeGame').addEventListener('click',resumeGame);
+document.addEventListener('pointerlockchange',()=>{if(!active)return;if(document.pointerLockElement===renderer.domElement){$('pauseOverlay').classList.remove('open');}else showPause();});
+window.addEventListener('keydown',e=>{if(e.code==='Escape'&&active){showPause();}},true);
+
+let chargeButton='left';
+renderer.domElement.addEventListener('mousedown',e=>{if(![0,2].includes(e.button)||!active)return;if(document.pointerLockElement!==renderer.domElement){renderer.domElement.requestPointerLock();return;}charging=true;chargeAt=performance.now();chargeButton=e.button===2?'right':'left';});
+function guessLocalShot(button,power){if(!world)return button==='right'?'스매시':'하이클리어';if(world.phase==='serve')return power<.39?'숏서브':'롱서브';const b=world.ball,nearNet=Math.abs(my.z)<2.45,low=b.y<1.6,high=b.y>2.25;if(button==='right'){if(world.lastShot==='스매시'&&low)return '드라이브';return high?'스매시':'드라이브';}if(nearNet&&low&&power<.40)return '헤어핀';return '하이클리어';}
+window.addEventListener('mouseup',e=>{if(!charging||((e.button===2?'right':'left')!==chargeButton))return;charging=false;const power=shotPower(performance.now()-chargeAt);const dir=new THREE.Vector3(0,0,-1).applyEuler(new THREE.Euler(pitch,yaw,0,'YXZ'));startVisibleSwing(guessLocalShot(chargeButton,power),world?.ball?.y??1.7,Math.max(-1,Math.min(1,((world?.ball?.x??my.x)-my.x)/1.2)));socket.emit('hit',{power,button:chargeButton,dir:{x:dir.x,y:dir.y,z:dir.z}});});
+renderer.domElement.onclick=()=>{if(active&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock();};
+// Predict the authoritative shuttle between network updates, then blend away small corrections.
+// Cork is modeled at local -Y, so that end is pointed along the velocity.
+const shuttleRender={initialized:false,x:0,y:0,z:0,vx:0,vy:0,vz:0,stamp:0,lastHit:-1,phase:''};
+const corkForward=new THREE.Vector3(0,-1,0),flightDir=new THREE.Vector3();
+const shuttleOrientation=new THREE.Quaternion();
+function advanceShuttle(b,dt){
+  // Integrate at the same 60Hz substep used by the server, avoiding frame-rate dependent flight.
+  let left=Math.min(.12,Math.max(0,dt));
+  while(left>0.000001){const h=Math.min(1/60,left);left-=h;
+    const drag=Math.exp(-.048*Math.hypot(b.vx,b.vy,b.vz)*h);
+    b.vx*=drag;b.vy*=drag;b.vz*=drag;b.vy-=9.81*h;
+    b.x+=b.vx*h;b.y+=b.vy*h;b.z+=b.vz*h;
+  }
+}
+function receiveBallState(s){
+  const b=s.ball,now=performance.now();
+  const changed=!shuttleRender.initialized||s.last!==shuttleRender.lastHit||s.phase!==shuttleRender.phase;
+  shuttleRender.lastHit=s.last;shuttleRender.phase=s.phase;
+  if(changed){Object.assign(shuttleRender,{x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz});shuttleRender.initialized=true;}
+  else {
+    // Position error correction is spread across frames rather than teleporting every packet.
+    const delta=Math.hypot(b.x-shuttleRender.x,b.y-shuttleRender.y,b.z-shuttleRender.z);
+    const factor=delta>.85?1:.24;
+    shuttleRender.x+=(b.x-shuttleRender.x)*factor;
+    shuttleRender.y+=(b.y-shuttleRender.y)*factor;
+    shuttleRender.z+=(b.z-shuttleRender.z)*factor;
+    shuttleRender.vx=b.vx;shuttleRender.vy=b.vy;shuttleRender.vz=b.vz;
+  }
+  shuttleRender.stamp=now;
+}
+// v12: AI animation uses a client-side clock, not cross-machine Date.now timestamps.
+const remoteSwingState=[{stamp:0,started:-1},{stamp:0,started:-1}];
+let last=performance.now();function frame(now){requestAnimationFrame(frame);const dt=Math.min(.05,(now-last)/1000);last=now;const power=charging?shotPower(now-chargeAt):tuning.basePower;const fraction=charging?Math.max(0,Math.min(1,(power-tuning.basePower)/Math.max(.001,tuning.maxPower-tuning.basePower))):0;$('pct').textContent=Math.round(fraction*100)+'%';$('realPower').textContent=Math.round(power*100)+'%';$('fill').style.width=(fraction*100)+'%';if(active&&document.pointerLockElement===renderer.domElement){if(jumpV!==0||jumpY>0){jumpY+=jumpV*dt;jumpV-=13.5*dt;if(jumpY<=0){jumpY=0;jumpV=0;}}const fw=(keys.KeyW?1:0)-(keys.KeyS?1:0),sd=(keys.KeyD?1:0)-(keys.KeyA?1:0),len=Math.hypot(fw,sd)||1;const moveX=(-Math.sin(yaw)*fw+Math.cos(yaw)*sd)/len*4.7*dt;const moveZ=(-Math.cos(yaw)*fw-Math.sin(yaw)*sd)/len*4.7*dt;my.x=Math.max(-2.69,Math.min(2.69,my.x+moveX));my.z=seat===0?Math.max(.65,Math.min(6.35,my.z+moveZ)):Math.max(-6.35,Math.min(-.7,my.z+moveZ));socket.volatile.emit('move',{x:my.x,z:my.z,yaw,pitch});}camera.position.set(my.x,1.68+jumpY,my.z);camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);const motion=swingProfiles[shotMotion(localSwingType)],elapsed=localSwingAt<0?9999:now-localSwingAt,v=swingStages(elapsed,motion.duration),sw=v.active,cp=contactPose(localContactY,localContactSide),impact=Math.max(0,1-Math.abs(elapsed/motion.duration-.48)/.30);// Animate a clearly visible first-person racket through preparation, contact and follow-through.
+const swingIntensity=Math.max(0,Math.min(1,Math.abs(sw)*.9+v.prep*.55+v.follow*.35));
+swingView.position.set(.51+cp.side*.12*impact,-.42+cp.high*.20*impact-cp.low*.20*impact,-.94);
+swingGrip.rotation.set(-.12+motion.armX*.32*v.prep-.85*sw+cp.low*.25*impact, .12+motion.waist*.45*sw, -.22+motion.shoulder*.56*sw+motion.wrist*.18*v.follow);
+swingGrip.position.set(-.09-.21*sw,-.05+.22*sw+.12*v.follow,0);
+swingHud.style.opacity=elapsed<motion.duration?'1':'.55';
+viewArm.rotation.set(-.25+motion.armX*(v.prep+v.follow*.35)-cp.high*.32*impact+cp.low*.27*impact,motion.waist*.25*sw+cp.side*.16*impact,-.25+motion.shoulder*.62*sw-cp.high*.38*impact+cp.low*.35*impact);viewElbow.rotation.set(-.35+.24*v.prep+cp.low*.20*impact,0,-.45+motion.elbow*.62*sw+cp.high*.15*impact);viewWrist.rotation.set(-.15+motion.handX*v.follow+cp.low*.15*impact,0,motion.wrist*sw);localRacket.rotation.set(-.4-cp.high*.22*impact+cp.low*.20*impact,cp.side*.15*impact,-.15);viewArm.position.set(.38+cp.side*.12*impact,-.30-motion.lean*.15*v.prep+cp.high*.23*impact-cp.low*.29*impact,-.48+motion.follow*.06*v.follow);if(world){const b=world.ball;
+  if(shuttleRender.initialized){
+    if(world.phase==='flight')advanceShuttle(shuttleRender,dt);
+    ball.position.set(shuttleRender.x,shuttleRender.y,shuttleRender.z);
+    flightDir.set(shuttleRender.vx,shuttleRender.vy,shuttleRender.vz);
+    if(world.phase==='flight'&&flightDir.lengthSq()>.02){
+      flightDir.normalize();
+      shuttleOrientation.setFromUnitVectors(corkForward,flightDir);
+      ball.quaternion.slerp(shuttleOrientation,1-Math.exp(-13*dt));
+    }
+  }else ball.position.set(b.x,b.y,b.z);
+  world.p.forEach((p,i)=>{athletes[i].g.position.set(p.x,p.jumpY||0,p.z);athletes[i].g.rotation.y=i===0?Math.PI:0;athletes[i].g.visible=i!==seat;const remote=remoteSwingState[i];const stamp=Number(p.swing)||0;if(stamp&&stamp!==remote.stamp){remote.stamp=stamp;remote.started=now;}const elapsed=remote.started<0?99999:now-remote.started;const walk=Math.sin(now*.012+i*2)*(Math.hypot(p.x-(athletes[i].prevX??p.x),p.z-(athletes[i].prevZ??p.z))>.004?1:0);animateBody(athletes[i],elapsed,walk,world.phase,p.swingShot||world.lastShot,p.contactY??1.7,p.contactSide??0);athletes[i].prevX=p.x;athletes[i].prevZ=p.z;});}renderer.render(scene,camera);}requestAnimationFrame(frame);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script></body></html>
